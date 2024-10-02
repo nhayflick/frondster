@@ -7,6 +7,13 @@ const theme = extendTheme({
     initialColorMode: 'light',
     useSystemColorMode: false,
   },
+  styles: {
+    global: (props: any) => ({
+      body: {
+        bg: props.colorMode === 'dark' ? '#1A202C' : 'gray.100',
+      },
+    }),
+  },
 });
 
 function ThemeToggle() {
