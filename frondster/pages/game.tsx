@@ -26,6 +26,10 @@ const generateDeck = (): Card[] => {
     }
   }
 
+  if (deck.length !== 81) {
+    throw new Error(`Invalid deck size: ${deck.length}. Expected 81 unique cards.`);
+  }
+
   return deck;
 };
 
@@ -45,7 +49,7 @@ const isSet = (cards: Card[]): boolean => {
 
 const Game: React.FC = () => {
   const [deck, setDeck] = useState<Card[]>([]);
-  const [board, setBoard] = useState<Card[]>([]);
+  const [board, setBoard] = useState<(Card | null)[]>([]);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [score, setScore] = useState(0);
   const toast = useToast();
@@ -98,15 +102,30 @@ const Game: React.FC = () => {
   };
 
   const replaceCards = (cardsToReplace: Card[]) => {
-    const newBoard = board.map(card =>
-      cardsToReplace.includes(card) ? deck[12] : card
+    const newBoard = board.map((card) =>
+      card && cardsToReplace.includes(card) ? null : card
     );
     setBoard(newBoard);
-    setDeck(deck.slice(13));
+    setDeck(deck.filter((card) => !cardsToReplace.includes(card)));
     setSelectedCards([]);
   };
 
-  const renderCard = (card: Card) => {
+  const renderCard = (card: Card | null, index: number) => {
+    if (card === null) {
+      return (
+        <Box
+          key={index}
+          borderWidth={2}
+          borderColor="gray.200"
+          borderRadius="lg"
+          p={2}
+          width="100%"
+          height="150px"
+          bg="gray.100"
+        />
+      );
+    }
+
     const isSelected = selectedCards.includes(card);
     const cardColor = card.color === 'red' ? '#FF0000' : card.color === 'green' ? '#00FF00' : '#800080';
 
