@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Grid, VStack, HStack, Text, useToast } from '@chakra-ui/react';
+import { 
+  Box, Button, Grid, VStack, HStack, Text, useToast,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton,
+  useDisclosure, Input, InputGroup, InputRightElement
+} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
+import copy from 'copy-to-clipboard';
 
 type Card = {
   color: 'red' | 'green' | 'purple';
@@ -52,6 +57,8 @@ const Game: React.FC = () => {
   const [board, setBoard] = useState<(Card | null)[]>([]);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [score, setScore] = useState(0);
+  const [isCopied, setIsCopied] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const router = useRouter();
   const { id } = router.query;
@@ -204,10 +211,26 @@ const Game: React.FC = () => {
   const clearSelection = () => {
     setSelectedCards([]);
   };
+  
+  const getShareableUrl = () => {
+    if (!id) return '';
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${baseUrl}/${id}?utm_medium=share`;
+  };
+  
+  const handleCopyUrl = () => {
+    const url = getShareableUrl();
+    copy(url);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   return (
     <VStack spacing={4} align="stretch" p={4}>
-      <Text fontSize="3xl" fontWeight="bold" textAlign="center">Set Game</Text>
+      <HStack justify="space-between" align="center">
+        <Text fontSize="3xl" fontWeight="bold">Set Game</Text>
+        <Button colorScheme="green" onClick={onOpen}>Share Game</Button>
+      </HStack>
       <Text fontSize="xl" fontWeight="semibold">Score: {score}</Text>
       <Grid templateColumns="repeat(4, 1fr)" gap={4}>
         {board.map(renderCard)}
@@ -217,6 +240,34 @@ const Game: React.FC = () => {
         <Button colorScheme="teal" onClick={clearSelection} isDisabled={selectedCards.length === 0}>Clear Selection</Button>
       </HStack>
       <Text fontSize="lg" fontWeight="medium" textAlign="center">Selected Cards: {selectedCards.length}/3</Text>
+      
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Share Game</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text mb={4}>Share this URL with a friend to invite them to play along</Text>
+            <InputGroup size="md">
+              <Input
+                pr="4.5rem"
+                value={getShareableUrl()}
+                isReadOnly
+              />
+              <InputRightElement width="4.5rem">
+                <Button h="1.75rem" size="sm" onClick={handleCopyUrl}>
+                  {isCopied ? 'Copied!' : 'Copy'}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </VStack>
   );
 };
