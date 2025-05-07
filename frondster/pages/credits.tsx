@@ -20,6 +20,9 @@ const Credits: React.FC = () => {
         <Text fontSize="xl" fontWeight="medium" color={textColor}>
           Designed by Devin
         </Text>
+        <Text fontSize="xl" fontWeight="medium" color={textColor}>
+          Story by Devin
+        </Text>
       </VStack>
     </Box>
   );
